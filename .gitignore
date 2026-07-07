@@ -3,3 +3,4 @@
 *.pdb
 *.swp
 .DS_Store
+*.log
