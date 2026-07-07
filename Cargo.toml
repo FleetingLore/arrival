@@ -1,8 +1,12 @@
 [workspace]
-resolver = "2"
+resolver = "3"
 members = [
     "arrival-cli",
     "arrival-core",
+    "arrival-serde",
+    "arrival-toml",
+    "arrival-string",
+    "arrival-cli-return",
 ]
 
 [workspace.package]

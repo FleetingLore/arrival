@@ -1,0 +1,13 @@
+[package]
+name = "arrival-toml"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+arrival-core = { path = "../arrival-core" }
+arrival-serde = { path = "../arrival-serde" }
+toml = "0.8"
