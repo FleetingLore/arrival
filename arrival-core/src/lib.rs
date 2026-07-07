@@ -1,113 +1,14 @@
-pub trait Arg {
-    fn to_string(&self) -> String;
-}
+pub mod arg;
+pub mod target;
+pub mod path;
+pub mod node;
+pub mod node_result;
+pub mod runtime;
+pub mod prelude;
 
-pub trait Target {
-    fn to_string(&self) -> String;
-}
-
-#[derive(Debug, Clone)]
-pub struct Path {
-    pub nodes: Vec<String>,
-}
-
-impl Path {
-    pub fn new() -> Self {
-        Self { nodes: Vec::new() }
-    }
-
-    pub fn from_str(s: &str) -> Self {
-        Self {
-            nodes: s.split('/').map(|s| s.to_string()).collect(),
-        }
-    }
-
-    pub fn push(&mut self, node_name: &str) {
-        self.nodes.push(node_name.to_string());
-    }
-
-    pub fn to_string(&self) -> String {
-        self.nodes.join("/")
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.nodes.is_empty()
-    }
-
-    pub fn len(&self) -> usize {
-        self.nodes.len()
-    }
-}
-
-pub trait Node {
-    fn path(&self) -> Path;
-    fn process(&self, arg: &dyn Arg) -> NodeResult;
-}
-
-pub enum NodeResult {
-    Next(Box<dyn Arg>, Path),
-    Done(Box<dyn Target>),
-}
-
-pub struct Runtime {
-    nodes: Vec<Box<dyn Node>>,
-    path: Path,
-}
-
-impl Runtime {
-    pub fn new() -> Self {
-        Self {
-            nodes: Vec::new(),
-            path: Path::new(),
-        }
-    }
-
-    pub fn add_node(&mut self, node: Box<dyn Node>) {
-        self.nodes.push(node);
-    }
-
-    pub fn get(&self, path: &Path) -> Option<&dyn Node> {
-        let key = path.to_string();
-        self.nodes.iter().find(|n| n.path().to_string() == key).map(|n| &**n)
-    }
-
-    pub fn run(&mut self, initial_arg: Box<dyn Arg>, start_path: Path) -> Option<Box<dyn Target>> {
-        let mut current_arg = initial_arg;
-        let mut current_path = start_path;
-
-        loop {
-            self.path.push(&current_path.to_string());
-
-            let node = match self.get(&current_path) {
-                Some(n) => n,
-                None => return None,
-            };
-
-            match node.process(&*current_arg) {
-                NodeResult::Done(target) => return Some(target),
-                NodeResult::Next(next_arg, next_path) => {
-                    current_arg = next_arg;
-                    current_path = next_path;
-                }
-            }
-        }
-    }
-
-    pub fn path(&self) -> &Path {
-        &self.path
-    }
-
-    pub fn reset(&mut self) {
-        self.path = Path::new();
-    }
-
-    pub fn iter_nodes(&self) -> impl Iterator<Item = &dyn Node> {
-        self.nodes.iter().map(|n| &**n)
-    }
-}
-
-impl Default for Runtime {
-    fn default() -> Self {
-        Self::new()
-    }
-}
+pub use arg::Arg;
+pub use target::Target;
+pub use path::Path;
+pub use node::Node;
+pub use node_result::NodeResult;
+pub use runtime::Runtime;

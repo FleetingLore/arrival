@@ -1,0 +1,39 @@
+    Checking arrival-cli v1.0.0 (/workspaces/arrival/arrival-cli)
+error[E0432]: unresolved import `crate::Commands`
+ --> arrival-cli/src/commands.rs:1:18
+  |
+1 | use crate::{Cli, Commands};
+  |                  ^^^^^^^^ no `Commands` in the root
+  |
+  = help: consider importing this enum instead:
+          crate::cli::Commands
+help: a similar name exists in the module (notice the capitalization)
+  |
+1 - use crate::{Cli, Commands};
+1 + use crate::{Cli, commands};
+  |
+
+error[E0599]: no associated function or constant named `parse` found for struct `Cli` in the current scope
+  --> arrival-cli/src/main.rs:12:20
+   |
+12 |     let cli = Cli::parse();
+   |                    ^^^^^ associated function or constant not found in `Cli`
+   |
+  ::: arrival-cli/src/cli.rs:7:1
+   |
+ 7 | pub struct Cli {
+   | -------------- associated function or constant `parse` not found for this struct
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `Parser` which provides `parse` is implemented but not in scope; perhaps you want to import it
+   |
+ 1 + use clap::Parser;
+   |
+help: there is an associated function `try_parse` with a similar name
+   |
+12 |     let cli = Cli::try_parse();
+   |                    ++++
+
+Some errors have detailed explanations: E0432, E0599.
+For more information about an error, try `rustc --explain E0432`.
+error: could not compile `arrival-cli` (bin "arrival-cli") due to 2 previous errors

@@ -1,13 +1,14 @@
 [workspace]
-resolver = "3"
+resolver = "2"
 members = [
-    "arrival-cli", "arrival-core",
+    "arrival-cli",
+    "arrival-core",
 ]
 
 [workspace.package]
-version = "1.0.0"
+version = "0.1.0"
 edition = "2024"
 authors = ["FleetingLore <macro__9@outlook.com>"]
-description = "Some developing framework for Lore"
+description = "Abstract layer communication framework"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/FleetingLore/arrival"
