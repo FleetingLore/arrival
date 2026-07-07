@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use arrival_core::{Arg, Target, Node, NodeResult, Registry, Runtime};
+use arrival_core::{Arg, Target, Node, NodeResult, Registry, Runtime, Path};
 
 #[derive(Parser)]
 #[command(name = "arrival")]

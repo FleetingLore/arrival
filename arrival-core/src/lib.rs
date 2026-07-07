@@ -19,6 +19,18 @@ impl Path {
     pub fn push(&mut self, node_name: &str) {
         self.nodes.push(node_name.to_string());
     }
+
+    pub fn get_root(&self) -> Option<&str> {
+        self.nodes.first().map(|s| s.as_str())
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.nodes.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.nodes.len()
+    }
 }
 
 pub trait Node {
@@ -47,8 +59,13 @@ impl Registry {
         self.nodes.insert(name, node);
     }
 
-    pub fn get(&self, name: &str) -> Option<&dyn Node> {
-        self.nodes.get(name).map(|b| &**b)
+    pub fn get(&self, path: &Path) -> Option<&dyn Node> {
+        let root = path.get_root()?;
+        self.nodes.get(root).map(|b| &**b)
+    }
+
+    pub fn get_root(&self, path: &Path) -> Option<&dyn Node> {
+        self.get(path)
     }
 }
 
@@ -61,6 +78,7 @@ impl Default for Registry {
 pub struct Runtime<'a> {
     registry: &'a Registry,
     path: Path,
+    current_path: Path,
 }
 
 impl<'a> Runtime<'a> {
@@ -68,18 +86,19 @@ impl<'a> Runtime<'a> {
         Self {
             registry,
             path: Path::new(),
+            current_path: Path::new(),
         }
     }
 
     pub fn run(&mut self, initial_arg: Box<dyn Arg>) -> Option<Box<dyn Target>> {
         let mut current_arg = initial_arg;
-        let mut current_node_name = "root".to_string();
+        let mut current_path = Path::new();
+        current_path.push("root");
 
         loop {
-            let node_name = current_node_name.clone();
-            self.path.push(&node_name);
+            self.path.push(current_path.get_root().unwrap_or("unknown"));
 
-            let node = match self.registry.get(&node_name) {
+            let node = match self.registry.get_root(&current_path) {
                 Some(n) => n,
                 None => return None,
             };
@@ -88,7 +107,8 @@ impl<'a> Runtime<'a> {
                 NodeResult::Done(target) => return Some(target),
                 NodeResult::Next(next_arg) => {
                     current_arg = next_arg;
-                    current_node_name = self.next_node_name(&*current_arg).to_string();
+                    let next_name = self.next_node_name(&*current_arg);
+                    current_path.push(next_name);
                 }
             }
         }
@@ -108,5 +128,6 @@ impl<'a> Runtime<'a> {
 
     pub fn reset(&mut self) {
         self.path = Path::new();
+        self.current_path = Path::new();
     }
 }
