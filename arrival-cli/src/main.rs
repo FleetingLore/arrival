@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use arrival_core::{Arg, Target, Node, Runtime};
+use arrival_core::{Arg, Target, Node, NodeResult, Registry, Runtime};
 
 #[derive(Parser)]
 #[command(name = "arrival")]
@@ -40,26 +40,44 @@ impl Target for StringTarget {
     }
 }
 
-struct ExampleNode;
+struct RootNode;
 
-impl Node for ExampleNode {
+impl Node for RootNode {
     fn name(&self) -> &str {
-        "example"
+        "root"
     }
 
-    fn provide_arg(&self) -> Box<dyn Arg> {
-        Box::new(StringArg {
-            raw: "provided arg".to_string(),
-        })
-    }
-
-    fn arrive(&self, arg: &dyn Arg) -> Option<Box<dyn Target>> {
-        if arg.to_string().contains("hello") {
-            Some(Box::new(StringTarget {
-                value: format!("ok: {}", arg.to_string()),
+    fn process(&self, arg: &dyn Arg) -> NodeResult {
+        let s = arg.to_string();
+        if s.contains("hello") {
+            NodeResult::Done(Box::new(StringTarget {
+                value: format!("root done: {}", s),
             }))
         } else {
-            None
+            NodeResult::Next(Box::new(StringArg {
+                raw: format!("root next: {}", s),
+            }))
+        }
+    }
+}
+
+struct ChildNode;
+
+impl Node for ChildNode {
+    fn name(&self) -> &str {
+        "child"
+    }
+
+    fn process(&self, arg: &dyn Arg) -> NodeResult {
+        let s = arg.to_string();
+        if s.contains("world") {
+            NodeResult::Done(Box::new(StringTarget {
+                value: format!("child done: {}", s),
+            }))
+        } else {
+            NodeResult::Next(Box::new(StringArg {
+                raw: format!("child next: {}", s),
+            }))
         }
     }
 }
@@ -69,11 +87,13 @@ fn main() {
 
     match cli.command {
         Commands::Ask { raw, verbose } => {
-            let node = ExampleNode;
-            let mut runtime = Runtime::new(&node, 10);
+            let mut registry = Registry::new();
+            registry.register(Box::new(RootNode));
+            registry.register(Box::new(ChildNode));
 
-            let initial_arg = StringArg { raw };
-            let result = runtime.run(&initial_arg);
+            let mut runtime = Runtime::new(&registry);
+            let initial_arg = Box::new(StringArg { raw });
+            let result = runtime.run(initial_arg);
 
             if verbose {
                 println!("path: {:?}", runtime.path().nodes);
@@ -85,7 +105,9 @@ fn main() {
             }
         }
         Commands::List => {
-            println!("no nodes implemented yet");
+            println!("registered nodes:");
+            println!("  root");
+            println!("  child");
         }
     }
 }

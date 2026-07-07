@@ -23,108 +23,83 @@ impl Path {
 
 pub trait Node {
     fn name(&self) -> &str;
-    fn provide_arg(&self) -> Box<dyn Arg>;
-    fn arrive(&self, arg: &dyn Arg) -> Option<Box<dyn Target>>;
-    fn next_node(&self) -> Option<&dyn Node> {
-        None
-    }
+    fn process(&self, arg: &dyn Arg) -> NodeResult;
 }
 
-pub struct CompositeNode {
-    pub name: String,
-    pub children: Vec<Box<dyn Node>>,
-    pub current_child: usize,
+pub enum NodeResult {
+    Next(Box<dyn Arg>),
+    Done(Box<dyn Target>),
 }
 
-impl CompositeNode {
-    pub fn new(name: &str) -> Self {
+pub struct Registry {
+    nodes: std::collections::HashMap<String, Box<dyn Node>>,
+}
+
+impl Registry {
+    pub fn new() -> Self {
         Self {
-            name: name.to_string(),
-            children: Vec::new(),
-            current_child: 0,
+            nodes: std::collections::HashMap::new(),
         }
     }
 
-    pub fn add_child(&mut self, child: Box<dyn Node>) {
-        self.children.push(child);
+    pub fn register(&mut self, node: Box<dyn Node>) {
+        let name = node.name().to_string();
+        self.nodes.insert(name, node);
+    }
+
+    pub fn get(&self, name: &str) -> Option<&dyn Node> {
+        self.nodes.get(name).map(|b| &**b)
     }
 }
 
-impl Node for CompositeNode {
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn provide_arg(&self) -> Box<dyn Arg> {
-        if let Some(child) = self.children.get(self.current_child) {
-            child.provide_arg()
-        } else {
-            Box::new(EmptyArg)
-        }
-    }
-
-    fn arrive(&self, arg: &dyn Arg) -> Option<Box<dyn Target>> {
-        for child in &self.children {
-            if let Some(target) = child.arrive(arg) {
-                return Some(target);
-            }
-        }
-        None
-    }
-
-    fn next_node(&self) -> Option<&dyn Node> {
-        self.children
-            .get(self.current_child)
-            .map(|b| &**b)
-    }
-}
-
-struct EmptyArg;
-
-impl Arg for EmptyArg {
-    fn to_string(&self) -> String {
-        String::new()
+impl Default for Registry {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
 pub struct Runtime<'a> {
-    pub entry_node: &'a dyn Node,
-    pub path: Path,
-    pub current_depth: usize,
-    pub max_depth: usize,
+    registry: &'a Registry,
+    path: Path,
 }
 
 impl<'a> Runtime<'a> {
-    pub fn new(entry_node: &'a dyn Node, max_depth: usize) -> Self {
+    pub fn new(registry: &'a Registry) -> Self {
         Self {
-            entry_node,
+            registry,
             path: Path::new(),
-            current_depth: 0,
-            max_depth,
         }
     }
 
-    pub fn run(&mut self, initial_arg: &dyn Arg) -> Option<Box<dyn Target>> {
-        let mut current_node = self.entry_node;
+    pub fn run(&mut self, initial_arg: Box<dyn Arg>) -> Option<Box<dyn Target>> {
+        let mut current_arg = initial_arg;
+        let mut current_node_name = "root".to_string();
 
-        while self.current_depth < self.max_depth {
-            self.path.push(current_node.name());
+        loop {
+            let node_name = current_node_name.clone();
+            self.path.push(&node_name);
 
-            let arg = current_node.provide_arg();
-            if let Some(target) = current_node.arrive(&*arg) {
-                return Some(target);
-            }
+            let node = match self.registry.get(&node_name) {
+                Some(n) => n,
+                None => return None,
+            };
 
-            match current_node.next_node() {
-                Some(next) => {
-                    current_node = next;
-                    self.current_depth += 1;
+            match node.process(&*current_arg) {
+                NodeResult::Done(target) => return Some(target),
+                NodeResult::Next(next_arg) => {
+                    current_arg = next_arg;
+                    current_node_name = self.next_node_name(&*current_arg).to_string();
                 }
-                None => break,
             }
         }
+    }
 
-        None
+    fn next_node_name(&self, arg: &dyn Arg) -> &str {
+        if arg.to_string().contains("child") {
+            "child"
+        } else {
+            "root"
+        }
     }
 
     pub fn path(&self) -> &Path {
@@ -133,6 +108,5 @@ impl<'a> Runtime<'a> {
 
     pub fn reset(&mut self) {
         self.path = Path::new();
-        self.current_depth = 0;
     }
 }
