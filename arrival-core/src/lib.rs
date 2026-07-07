@@ -16,12 +16,18 @@ impl Path {
         Self { nodes: Vec::new() }
     }
 
+    pub fn from_str(s: &str) -> Self {
+        Self {
+            nodes: s.split('/').map(|s| s.to_string()).collect(),
+        }
+    }
+
     pub fn push(&mut self, node_name: &str) {
         self.nodes.push(node_name.to_string());
     }
 
-    pub fn get_root(&self) -> Option<&str> {
-        self.nodes.first().map(|s| s.as_str())
+    pub fn to_string(&self) -> String {
+        self.nodes.join("/")
     }
 
     pub fn is_empty(&self) -> bool {
@@ -34,91 +40,56 @@ impl Path {
 }
 
 pub trait Node {
-    fn name(&self) -> &str;
+    fn path(&self) -> Path;
     fn process(&self, arg: &dyn Arg) -> NodeResult;
 }
 
 pub enum NodeResult {
-    Next(Box<dyn Arg>),
+    Next(Box<dyn Arg>, Path),
     Done(Box<dyn Target>),
 }
 
-pub struct Registry {
-    nodes: std::collections::HashMap<String, Box<dyn Node>>,
+pub struct Runtime {
+    nodes: Vec<Box<dyn Node>>,
+    path: Path,
 }
 
-impl Registry {
+impl Runtime {
     pub fn new() -> Self {
         Self {
-            nodes: std::collections::HashMap::new(),
+            nodes: Vec::new(),
+            path: Path::new(),
         }
     }
 
-    pub fn register(&mut self, node: Box<dyn Node>) {
-        let name = node.name().to_string();
-        self.nodes.insert(name, node);
+    pub fn add_node(&mut self, node: Box<dyn Node>) {
+        self.nodes.push(node);
     }
 
     pub fn get(&self, path: &Path) -> Option<&dyn Node> {
-        let root = path.get_root()?;
-        self.nodes.get(root).map(|b| &**b)
+        let key = path.to_string();
+        self.nodes.iter().find(|n| n.path().to_string() == key).map(|n| &**n)
     }
 
-    pub fn get_root(&self, path: &Path) -> Option<&dyn Node> {
-        self.get(path)
-    }
-}
-
-impl Default for Registry {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-pub struct Runtime<'a> {
-    registry: &'a Registry,
-    path: Path,
-    current_path: Path,
-}
-
-impl<'a> Runtime<'a> {
-    pub fn new(registry: &'a Registry) -> Self {
-        Self {
-            registry,
-            path: Path::new(),
-            current_path: Path::new(),
-        }
-    }
-
-    pub fn run(&mut self, initial_arg: Box<dyn Arg>) -> Option<Box<dyn Target>> {
+    pub fn run(&mut self, initial_arg: Box<dyn Arg>, start_path: Path) -> Option<Box<dyn Target>> {
         let mut current_arg = initial_arg;
-        let mut current_path = Path::new();
-        current_path.push("root");
+        let mut current_path = start_path;
 
         loop {
-            self.path.push(current_path.get_root().unwrap_or("unknown"));
+            self.path.push(&current_path.to_string());
 
-            let node = match self.registry.get_root(&current_path) {
+            let node = match self.get(&current_path) {
                 Some(n) => n,
                 None => return None,
             };
 
             match node.process(&*current_arg) {
                 NodeResult::Done(target) => return Some(target),
-                NodeResult::Next(next_arg) => {
+                NodeResult::Next(next_arg, next_path) => {
                     current_arg = next_arg;
-                    let next_name = self.next_node_name(&*current_arg);
-                    current_path.push(next_name);
+                    current_path = next_path;
                 }
             }
-        }
-    }
-
-    fn next_node_name(&self, arg: &dyn Arg) -> &str {
-        if arg.to_string().contains("child") {
-            "child"
-        } else {
-            "root"
         }
     }
 
@@ -128,6 +99,15 @@ impl<'a> Runtime<'a> {
 
     pub fn reset(&mut self) {
         self.path = Path::new();
-        self.current_path = Path::new();
+    }
+
+    pub fn iter_nodes(&self) -> impl Iterator<Item = &dyn Node> {
+        self.nodes.iter().map(|n| &**n)
+    }
+}
+
+impl Default for Runtime {
+    fn default() -> Self {
+        Self::new()
     }
 }

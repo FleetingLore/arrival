@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use arrival_core::{Arg, Target, Node, NodeResult, Registry, Runtime, Path};
+use arrival_core::{Arg, Target, Node, NodeResult, Runtime, Path};
 
 #[derive(Parser)]
 #[command(name = "arrival")]
@@ -43,8 +43,8 @@ impl Target for StringTarget {
 struct RootNode;
 
 impl Node for RootNode {
-    fn name(&self) -> &str {
-        "root"
+    fn path(&self) -> Path {
+        Path::from_str("root")
     }
 
     fn process(&self, arg: &dyn Arg) -> NodeResult {
@@ -53,10 +53,20 @@ impl Node for RootNode {
             NodeResult::Done(Box::new(StringTarget {
                 value: format!("root done: {}", s),
             }))
+        } else if s.contains("child") {
+            NodeResult::Next(
+                Box::new(StringArg {
+                    raw: format!("root forwarded: {}", s),
+                }),
+                Path::from_str("root/child"),
+            )
         } else {
-            NodeResult::Next(Box::new(StringArg {
-                raw: format!("root next: {}", s),
-            }))
+            NodeResult::Next(
+                Box::new(StringArg {
+                    raw: format!("root next: {}", s),
+                }),
+                Path::from_str("root"),
+            )
         }
     }
 }
@@ -64,8 +74,8 @@ impl Node for RootNode {
 struct ChildNode;
 
 impl Node for ChildNode {
-    fn name(&self) -> &str {
-        "child"
+    fn path(&self) -> Path {
+        Path::from_str("root/child")
     }
 
     fn process(&self, arg: &dyn Arg) -> NodeResult {
@@ -75,9 +85,12 @@ impl Node for ChildNode {
                 value: format!("child done: {}", s),
             }))
         } else {
-            NodeResult::Next(Box::new(StringArg {
-                raw: format!("child next: {}", s),
-            }))
+            NodeResult::Next(
+                Box::new(StringArg {
+                    raw: format!("child next: {}", s),
+                }),
+                Path::from_str("root/child"),
+            )
         }
     }
 }
@@ -85,15 +98,14 @@ impl Node for ChildNode {
 fn main() {
     let cli = Cli::parse();
 
+    let mut runtime = Runtime::new();
+    runtime.add_node(Box::new(RootNode));
+    runtime.add_node(Box::new(ChildNode));
+
     match cli.command {
         Commands::Ask { raw, verbose } => {
-            let mut registry = Registry::new();
-            registry.register(Box::new(RootNode));
-            registry.register(Box::new(ChildNode));
-
-            let mut runtime = Runtime::new(&registry);
             let initial_arg = Box::new(StringArg { raw });
-            let result = runtime.run(initial_arg);
+            let result = runtime.run(initial_arg, Path::from_str("root"));
 
             if verbose {
                 println!("path: {:?}", runtime.path().nodes);
@@ -105,9 +117,10 @@ fn main() {
             }
         }
         Commands::List => {
-            println!("registered nodes:");
-            println!("  root");
-            println!("  child");
+            println!("nodes:");
+            for node in runtime.iter_nodes() {
+                println!("  {}", node.path().to_string());
+            }
         }
     }
 }
