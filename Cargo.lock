@@ -54,7 +54,7 @@ dependencies = [
 
 [[package]]
 name = "arrival-cli"
-version = "1.0.0"
+version = "0.1.0"
 dependencies = [
  "arrival-core",
  "clap",
@@ -62,7 +62,7 @@ dependencies = [
 
 [[package]]
 name = "arrival-core"
-version = "1.0.0"
+version = "0.1.0"
 
 [[package]]
 name = "clap"
