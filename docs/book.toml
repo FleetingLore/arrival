@@ -1,0 +1,8 @@
+[book]
+authors = ["FleetingLore"]
+language = "en"
+src = "src"
+title = "Arrival"
+
+[output.html]
+git-repository-url = "https://github.com/FleetingLore/arrival"
