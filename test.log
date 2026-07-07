@@ -1,0 +1,70 @@
+=== test1: builtin custom ===
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running `target/debug/arrival-cli builtin hello --verbose`
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] using builtin nodes, type: Custom
+[2026-07-07T21:21:21Z DEBUG arrival_cli::commands] raw input: hello
+[2026-07-07T21:21:21Z DEBUG arrival_cli::commands] adding custom nodes
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] starting runtime from root
+path: ["root"]
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] got result: custom done: hello
+custom done: hello
+
+=== test2: builtin string ===
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.13s
+     Running `target/debug/arrival-cli builtin test --verbose --node-type string`
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] using builtin nodes, type: String
+[2026-07-07T21:21:21Z DEBUG arrival_cli::commands] raw input: test
+[2026-07-07T21:21:21Z DEBUG arrival_cli::commands] adding string nodes
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] starting runtime from root
+path: ["root"]
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] got result: root response
+root response
+
+=== test3: builtin cli-return ===
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running `target/debug/arrival-cli builtin test --verbose --node-type cli-return`
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] using builtin nodes, type: CliReturn
+[2026-07-07T21:21:21Z DEBUG arrival_cli::commands] raw input: test
+[2026-07-07T21:21:21Z DEBUG arrival_cli::commands] adding cli-return nodes
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] starting runtime from root
+path: ["root"]
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] got result: echo: test
+echo: test
+
+=== test4: toml ===
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running `target/debug/arrival-cli toml hello --verbose --config /tmp/test.toml`
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] loading TOML config from: /tmp/test.toml
+[2026-07-07T21:21:21Z DEBUG arrival_cli::commands] raw input: hello
+[2026-07-07T21:21:21Z WARN  arrival_cli::commands] reading /tmp/test.toml failed, using sample config
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] TOML parsed successfully
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] starting runtime from root
+path: ["root", "root/child"]
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] got result: toml response
+toml response
+
+=== test5: list ===
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.14s
+     Running `target/debug/arrival-cli list`
+[2026-07-07T21:21:21Z INFO  arrival_cli::commands] listing all nodes
+custom nodes:
+  root
+  root/child
+
+string nodes:
+  root
+  root/child
+
+cli-return nodes:
+  root
+  root/child
+
+toml sample:
+[[nodes]]
+path = { nodes = ["root"] }
+next = { nodes = ["root/child"] }
+
+[[nodes]]
+path = { nodes = ["root/child"] }
+result = "toml response"
+

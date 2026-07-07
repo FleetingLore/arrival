@@ -1,20 +1,14 @@
 mod cli;
 mod commands;
 mod nodes;
-mod args;
+mod configs;
 
 use clap::Parser;
 use cli::Cli;
 use commands::handle_command;
-use nodes::{RootNode, ChildNode};
-use arrival_core::Runtime;
 
 fn main() {
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
     let cli = Cli::parse();
-
-    let mut runtime = Runtime::new();
-    runtime.add_node(Box::new(RootNode));
-    runtime.add_node(Box::new(ChildNode));
-
-    handle_command(cli, runtime);
+    handle_command(cli);
 }

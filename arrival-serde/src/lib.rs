@@ -3,11 +3,9 @@ mod target_serde;
 mod path_serde;
 mod node_serde;
 mod runtime_serde;
-mod prelude;
 
 pub use arg_serde::SerdeArg;
 pub use target_serde::SerdeTarget;
 pub use path_serde::SerdePath;
 pub use node_serde::SerdeNode;
 pub use runtime_serde::SerdeRuntime;
-pub use prelude::*;

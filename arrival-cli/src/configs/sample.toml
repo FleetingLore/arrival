@@ -1,0 +1,7 @@
+[[nodes]]
+path = { nodes = ["root"] }
+next = { nodes = ["root/child"] }
+
+[[nodes]]
+path = { nodes = ["root/child"] }
+result = "toml response"

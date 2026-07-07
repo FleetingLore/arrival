@@ -1,5 +1,4 @@
 use arrival_core::{Arg, Target, Node, NodeResult, Path};
-use clap::Parser;
 
 pub struct CliReturnNode {
     path: Path,

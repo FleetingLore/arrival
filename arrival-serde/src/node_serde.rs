@@ -1,4 +1,4 @@
-use arrival_core::{Node, NodeResult, Arg, Target, Path};
+use arrival_core::{Node, NodeResult, Arg, Path};
 use serde::{Deserialize, Serialize};
 use crate::{SerdeArg, SerdeTarget, SerdePath};
 

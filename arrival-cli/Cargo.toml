@@ -9,4 +9,9 @@ repository.workspace = true
 
 [dependencies]
 arrival-core = { path = "../arrival-core" }
+arrival-string = { path = "../arrival-string" }
+arrival-cli-return = { path = "../arrival-cli-return" }
+arrival-toml = { path = "../arrival-toml" }
 clap = { version = "4", features = ["derive"] }
+env_logger = "0.11"
+log = "0.4"
