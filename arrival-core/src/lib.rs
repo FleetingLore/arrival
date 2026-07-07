@@ -1,9 +1,9 @@
 pub trait Arg {
-    fn toString(&self) -> String;
+    fn to_string(&self) -> String;
 }
 
 pub trait Target {
-    fn toString(&self) -> String;
+    fn to_string(&self) -> String;
 }
 
 #[derive(Debug, Clone)]
@@ -82,7 +82,7 @@ impl Node for CompositeNode {
 struct EmptyArg;
 
 impl Arg for EmptyArg {
-    fn toString(&self) -> String {
+    fn to_string(&self) -> String {
         String::new()
     }
 }

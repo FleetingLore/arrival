@@ -25,7 +25,7 @@ struct StringArg {
 }
 
 impl Arg for StringArg {
-    fn toString(&self) -> String {
+    fn to_string(&self) -> String {
         self.raw.clone()
     }
 }
@@ -35,7 +35,7 @@ struct StringTarget {
 }
 
 impl Target for StringTarget {
-    fn toString(&self) -> String {
+    fn to_string(&self) -> String {
         self.value.clone()
     }
 }
@@ -54,9 +54,9 @@ impl Node for ExampleNode {
     }
 
     fn arrive(&self, arg: &dyn Arg) -> Option<Box<dyn Target>> {
-        if arg.toString().contains("hello") {
+        if arg.to_string().contains("hello") {
             Some(Box::new(StringTarget {
-                value: format!("ok: {}", arg.toString()),
+                value: format!("ok: {}", arg.to_string()),
             }))
         } else {
             None
@@ -80,7 +80,7 @@ fn main() {
             }
 
             match result {
-                Some(target) => println!("{}", target.toString()),
+                Some(target) => println!("{}", target.to_string()),
                 None => println!("no answer"),
             }
         }
