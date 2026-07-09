@@ -6,4 +6,3 @@
 [Built-in Nodes](builtin-nodes.md)
 [Configuration](configuration.md)
 [CLI Reference](cli.md)
-[Roadmap](roadmap.md)
