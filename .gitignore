@@ -2,5 +2,11 @@
 **/*.rs.bk
 *.pdb
 *.swp
+
+# Darwin
 .DS_Store
+
 *.log
+
+# mdbook
+mdbook/book
