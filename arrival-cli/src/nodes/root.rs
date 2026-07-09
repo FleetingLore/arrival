@@ -1,10 +1,10 @@
-use arrival_core::{Arg, Node, NodeResult, Path};
+use arrival_core::{Arg, Node, NodeResult, Trace};
 
 pub struct RootNode;
 
 impl Node for RootNode {
-    fn path(&self) -> Path {
-        Path::from_str("root")
+    fn path(&self) -> Trace {
+        Trace::from_str("root")
     }
 
     fn process(&self, arg: &dyn Arg) -> NodeResult {
@@ -18,14 +18,14 @@ impl Node for RootNode {
                 Box::new(crate::args::StringArg {
                     raw: format!("root forwarded: {}", s),
                 }),
-                Path::from_str("root/child"),
+                Trace::from_str("root/child"),
             )
         } else {
             NodeResult::Next(
                 Box::new(crate::args::StringArg {
                     raw: format!("root next: {}", s),
                 }),
-                Path::from_str("root"),
+                Trace::from_str("root"),
             )
         }
     }

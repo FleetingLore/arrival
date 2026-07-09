@@ -1,20 +1,20 @@
-use arrival_core::{Arg, Target, Node, NodeResult, Path};
+use arrival_core::{Arg, Node, NodeResult, Target, Trace};
 
 pub struct StringNode {
-    path: Path,
+    path_str: String,
     response: String,
 }
 
 impl StringNode {
     pub fn new(path: &str, response: &str) -> Self {
         Self {
-            path: Path::from_str(path),
+            path_str: path.to_string(),
             response: response.to_string(),
         }
     }
 
     pub fn with_path(mut self, path: &str) -> Self {
-        self.path = Path::from_str(path);
+        self.path_str = path.to_string();
         self
     }
 
@@ -25,8 +25,8 @@ impl StringNode {
 }
 
 impl Node for StringNode {
-    fn path(&self) -> Path {
-        self.path.clone()
+    fn path(&self) -> Trace {
+        Trace::from_str(&self.path_str)
     }
 
     fn process(&self, arg: &dyn Arg) -> NodeResult {
@@ -65,7 +65,9 @@ mod tests {
     #[test]
     fn test_string_node() {
         let node = StringNode::new("root", "hello world");
-        let arg = TestArg { raw: "test".to_string() };
+        let arg = TestArg {
+            raw: "test".to_string(),
+        };
         let result = node.process(&arg);
         match result {
             NodeResult::Done(target) => {

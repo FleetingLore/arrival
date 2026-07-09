@@ -1,13 +1,16 @@
 # Getting Started
 
-Add Arrival to Cargo.toml:
+添加 Arrival 到 Cargo.toml:
 
+```toml
 [dependencies]
-arrival-core = "0.1"
+arrival-core = "0.2"
+```
 
-## Basic Example
+## 基本示例
 
-use arrival_core::{Arg, Target, Node, NodeResult, Runtime, Path};
+```rust
+use arrival_core::{Arg, Target, Node, NodeResult, Runtime, Trace};
 
 struct MyArg {
     raw: String,
@@ -32,8 +35,8 @@ impl Target for MyTarget {
 struct RootNode;
 
 impl Node for RootNode {
-    fn path(&self) -> Path {
-        Path::from_str("root")
+    fn path(&self) -> Trace {
+        Trace::from_str("root")
     }
 
     fn process(&self, arg: &dyn Arg) -> NodeResult {
@@ -46,7 +49,7 @@ impl Node for RootNode {
                 Box::new(MyArg {
                     raw: format!("forwarded: {}", arg.to_string()),
                 }),
-                Path::from_str("root/child"),
+                Trace::from_str("root::child"),
             )
         }
     }
@@ -55,8 +58,8 @@ impl Node for RootNode {
 struct ChildNode;
 
 impl Node for ChildNode {
-    fn path(&self) -> Path {
-        Path::from_str("root/child")
+    fn path(&self) -> Trace {
+        Trace::from_str("root::child")
     }
 
     fn process(&self, arg: &dyn Arg) -> NodeResult {
@@ -75,6 +78,7 @@ fn main() {
         raw: "hello".to_string(),
     });
 
-    let result = runtime.run(arg, Path::from_str("root"));
+    let result = runtime.run(arg, Trace::from_str("root"));
     println!("{}", result.unwrap().to_string());
 }
+```

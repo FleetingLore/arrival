@@ -1,24 +1,25 @@
 # Introduction
 
-Arrival is a framework for abstract layer communication. Requests descend through layers until an answer is reached.
+Arrival 是一个抽象层通信框架. 请求逐层下降, 直到找到答案.
 
-## What is Arrival?
+## Arrival 是什么?
 
-Arrival provides traits for layered systems:
+Arrival 为分层系统提供了以下 trait:
 
-- Arg: a request that descends through layers
-- Target: a response that is returned
-- Node: a single layer that processes arguments
-- Runtime: the execution engine that manages descent
+- Arg: 在层间下降的请求
+- Target: 返回的响应
+- Node: 处理参数的单个层
+- Trace: 节点之间的路由路径
+- Runtime: 管理下降过程的执行引擎
 
-## Use Cases
+## 使用场景
 
-- File system abstraction
-- Configuration lookup
-- Protocol negotiation
-- Command routing
-- Multi-stage processing
+- 文件系统抽象
+- 配置查找
+- 协议协商
+- 命令路由
+- 多阶段处理
 
-## Status
+## 项目状态
 
-Arrival is in active development. The core API is stable.
+Arrival 正在积极开发中. 核心 API 已稳定.

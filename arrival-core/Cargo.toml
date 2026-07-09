@@ -8,4 +8,4 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-arrival-trace = { path = "../arrival-trace" }
+arrival-trace = { path = "../arrival-trace", version = "0.2.0" }

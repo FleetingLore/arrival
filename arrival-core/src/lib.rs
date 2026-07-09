@@ -8,6 +8,7 @@
 pub mod node;
 pub mod runtime;
 
+pub use arrival_trace::Trace;
 pub use node::Arg;
 pub use node::Node;
 pub use node::NodeResult;

@@ -1,19 +1,22 @@
 # Built-in Nodes
 
-Arrival provides several built-in node implementations.
+Arrival 提供了若干内置的 Node 实现.
 
 ## StringNode
 
-Returns a fixed string response regardless of input.
+无论输入如何, 始终返回固定字符串响应.
 
+```rust
 use arrival_string::StringNode;
 
 let node = StringNode::new("root", "Hello, world!");
+```
 
 ## CliReturnNode
 
-Executes a CLI command and returns its output.
+执行命令行并返回其输出.
 
+```rust
 use arrival_cli_return::{CliReturnNode, CliCommand};
 
 struct MyCommand;
@@ -25,23 +28,28 @@ impl CliCommand for MyCommand {
 }
 
 let node = CliReturnNode::new("root", MyCommand);
+```
 
-## CustomNode
+## 自定义 Node
 
-Implement the Node trait for custom logic.
+实现 Node trait 以实现自定义逻辑.
+
+```rust
+use arrival_core::{Node, NodeResult, Arg, Target, Trace};
 
 struct MyNode;
 
 impl Node for MyNode {
-    fn path(&self) -> Path {
-        Path::from_str("my/path")
+    fn path(&self) -> Trace {
+        Trace::from_str("my::path")
     }
 
     fn process(&self, arg: &dyn Arg) -> NodeResult {
         NodeResult::Done(Box::new(MyTarget))
     }
 }
+```
 
 ## SerdeNode
 
-Nodes defined via TOML configuration. See the Configuration chapter.
+通过 TOML 配置定义的节点. 详见配置章节.

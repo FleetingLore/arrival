@@ -1,13 +1,17 @@
 use crate::cli::{Cli, Commands, NodeType};
-use crate::nodes::{CustomNode, create_string_nodes, create_cli_return_nodes};
 use crate::configs::SAMPLE_TOML;
-use arrival_core::{Arg, Runtime, Path};
+use crate::nodes::{CustomNode, create_cli_return_nodes, create_string_nodes};
+use arrival_core::{Arg, Runtime, Trace};
 use arrival_toml::from_str;
-use log::{info, debug, warn, error};
+use log::{debug, error, info, warn};
 
 pub fn handle_command(cli: Cli) {
     match cli.command {
-        Commands::Builtin { raw, verbose, node_type } => {
+        Commands::Builtin {
+            raw,
+            verbose,
+            node_type,
+        } => {
             let mut runtime = Runtime::new();
             let node_type = node_type.unwrap_or(NodeType::Custom);
 
@@ -36,10 +40,10 @@ pub fn handle_command(cli: Cli) {
 
             let initial_arg = Box::new(StringArg { raw });
             info!("starting runtime from root");
-            let result = runtime.run(initial_arg, Path::from_str("root"));
+            let result = runtime.run(initial_arg, Trace::from_str("root"));
 
             if verbose {
-                println!("path: {:?}", runtime.path().nodes);
+                println!("path: {:?}", runtime.path().segments_str());
             }
 
             match result {
@@ -53,15 +57,18 @@ pub fn handle_command(cli: Cli) {
                 }
             }
         }
-        Commands::Toml { raw, verbose, config } => {
+        Commands::Toml {
+            raw,
+            verbose,
+            config,
+        } => {
             info!("loading TOML config from: {}", config);
             debug!("raw input: {}", raw);
 
-            let content = std::fs::read_to_string(&config)
-                .unwrap_or_else(|_| {
-                    warn!("reading {} failed, using sample config", config);
-                    SAMPLE_TOML.to_string()
-                });
+            let content = std::fs::read_to_string(&config).unwrap_or_else(|_| {
+                warn!("reading {} failed, using sample config", config);
+                SAMPLE_TOML.to_string()
+            });
 
             let mut runtime = match from_str(&content) {
                 Ok(r) => {
@@ -76,10 +83,10 @@ pub fn handle_command(cli: Cli) {
 
             let initial_arg = Box::new(StringArg { raw });
             info!("starting runtime from root");
-            let result = runtime.run(initial_arg, Path::from_str("root"));
+            let result = runtime.run(initial_arg, Trace::from_str("root"));
 
             if verbose {
-                println!("path: {:?}", runtime.path().nodes);
+                println!("path: {:?}", runtime.path().segments_str());
             }
 
             match result {

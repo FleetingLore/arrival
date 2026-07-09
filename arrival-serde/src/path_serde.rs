@@ -1,4 +1,4 @@
-use arrival_core::Path;
+use arrival_core::Trace;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -11,19 +11,20 @@ impl SerdePath {
         Self { nodes: Vec::new() }
     }
 
-    pub fn from_path(path: &Path) -> Self {
+    pub fn from_trace(trace: &Trace) -> Self {
         Self {
-            nodes: path.nodes.clone(),
+            nodes: trace.segments_str(),
         }
     }
 
-    pub fn to_path(&self) -> Path {
-        Path {
-            nodes: self.nodes.clone(),
-        }
+    pub fn to_trace(&self) -> Trace {
+        let joined = self.nodes.join("::");
+        Trace::from_str(&joined)
     }
 
     pub fn from_str(s: &str) -> Self {
+        // SerdePath uses '/' as delimiter, Trace uses '::'
+        // Keep the original behavior for SerdePath's own use
         Self {
             nodes: s.split('/').map(|s| s.to_string()).collect(),
         }
@@ -37,18 +38,20 @@ impl SerdePath {
         self.nodes.push(node.to_string());
     }
 
-    pub fn matches(&self, path: &Path) -> bool {
-        if self.nodes.len() != path.nodes.len() {
+    pub fn matches(&self, trace: &Trace) -> bool {
+        let trace_nodes = trace.segments_str();
+        if self.nodes.len() != trace_nodes.len() {
             return false;
         }
-        self.nodes.iter().zip(&path.nodes).all(|(a, b)| a == b)
+        self.nodes.iter().zip(&trace_nodes).all(|(a, b)| a == b)
     }
 
-    pub fn starts_with(&self, path: &Path) -> bool {
-        if self.nodes.len() > path.nodes.len() {
+    pub fn starts_with(&self, trace: &Trace) -> bool {
+        let trace_nodes = trace.segments_str();
+        if self.nodes.len() > trace_nodes.len() {
             return false;
         }
-        self.nodes.iter().zip(&path.nodes).all(|(a, b)| a == b)
+        self.nodes.iter().zip(&trace_nodes).all(|(a, b)| a == b)
     }
 }
 

@@ -1,20 +1,20 @@
-use arrival_core::{Arg, Node, NodeResult, Path};
+use arrival_core::{Arg, Node, NodeResult, Trace};
 
 pub struct CustomNode {
-    path: Path,
+    path_str: String,
 }
 
 impl CustomNode {
     pub fn new(path: &str) -> Self {
         Self {
-            path: Path::from_str(path),
+            path_str: path.to_string(),
         }
     }
 }
 
 impl Node for CustomNode {
-    fn path(&self) -> Path {
-        self.path.clone()
+    fn path(&self) -> Trace {
+        Trace::from_str(&self.path_str)
     }
 
     fn process(&self, arg: &dyn Arg) -> NodeResult {
@@ -28,14 +28,14 @@ impl Node for CustomNode {
                 Box::new(CustomArg {
                     raw: format!("custom forwarded: {}", s),
                 }),
-                Path::from_str("root/child"),
+                Trace::from_str("root/child"),
             )
         } else {
             NodeResult::Next(
                 Box::new(CustomArg {
                     raw: format!("custom next: {}", s),
                 }),
-                Path::from_str("root"),
+                Trace::from_str("root"),
             )
         }
     }

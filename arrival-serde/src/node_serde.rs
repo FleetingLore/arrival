@@ -1,6 +1,6 @@
-use arrival_core::{Node, NodeResult, Arg, Path};
+use crate::{SerdeArg, SerdePath, SerdeTarget};
+use arrival_core::{Arg, Node, NodeResult, Trace};
 use serde::{Deserialize, Serialize};
-use crate::{SerdeArg, SerdeTarget, SerdePath};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SerdeNode {
@@ -12,8 +12,8 @@ pub struct SerdeNode {
 }
 
 impl Node for SerdeNode {
-    fn path(&self) -> Path {
-        self.path.to_path()
+    fn path(&self) -> Trace {
+        self.path.to_trace()
     }
 
     fn process(&self, arg: &dyn Arg) -> NodeResult {
@@ -24,13 +24,10 @@ impl Node for SerdeNode {
         } else if let Some(next) = &self.next {
             NodeResult::Next(
                 Box::new(SerdeArg::String(format!("forward: {}", arg_str))),
-                next.to_path(),
+                next.to_trace(),
             )
         } else {
-            NodeResult::Next(
-                Box::new(SerdeArg::String(arg_str)),
-                self.path.to_path(),
-            )
+            NodeResult::Next(Box::new(SerdeArg::String(arg_str)), self.path.to_trace())
         }
     }
 }

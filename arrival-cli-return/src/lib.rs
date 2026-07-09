@@ -1,27 +1,27 @@
-use arrival_core::{Arg, Target, Node, NodeResult, Path};
+use arrival_core::{Arg, Node, NodeResult, Target, Trace};
 
 pub struct CliReturnNode {
-    path: Path,
+    path_str: String,
     cli: Box<dyn CliCommand>,
 }
 
 impl CliReturnNode {
     pub fn new<C: CliCommand + 'static>(path: &str, cli: C) -> Self {
         Self {
-            path: Path::from_str(path),
+            path_str: path.to_string(),
             cli: Box::new(cli),
         }
     }
 
     pub fn with_path(mut self, path: &str) -> Self {
-        self.path = Path::from_str(path);
+        self.path_str = path.to_string();
         self
     }
 }
 
 impl Node for CliReturnNode {
-    fn path(&self) -> Path {
-        self.path.clone()
+    fn path(&self) -> Trace {
+        Trace::from_str(&self.path_str)
     }
 
     fn process(&self, arg: &dyn Arg) -> NodeResult {
@@ -66,7 +66,9 @@ mod tests {
     #[test]
     fn test_cli_return_node() {
         let node = CliReturnNode::new("root", EchoCommand);
-        let arg = TestArg { raw: "hello".to_string() };
+        let arg = TestArg {
+            raw: "hello".to_string(),
+        };
         let result = node.process(&arg);
         match result {
             NodeResult::Done(target) => {
