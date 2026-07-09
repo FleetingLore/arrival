@@ -1,5 +1,5 @@
 [package]
-name = "arrival-core"
+name = "arrival-trace"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -8,4 +8,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-arrival-trace = { path = "../arrival-trace" }
+
+[features]
+segment-string = []
+default = ["segment-string"]

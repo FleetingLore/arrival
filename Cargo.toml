@@ -5,12 +5,13 @@ members = [
     "arrival-core",
     "arrival-serde",
     "arrival-toml",
+    "arrival-trace",
     "arrival-string",
     "arrival-cli-return",
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 authors = ["FleetingLore <macro__9@outlook.com>"]
 description = "Abstract layer communication framework"

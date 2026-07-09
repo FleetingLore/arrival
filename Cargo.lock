@@ -63,7 +63,7 @@ dependencies = [
 
 [[package]]
 name = "arrival-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "arrival-cli-return",
  "arrival-core",
@@ -76,7 +76,7 @@ dependencies = [
 
 [[package]]
 name = "arrival-cli-return"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "arrival-core",
  "clap",
@@ -84,11 +84,14 @@ dependencies = [
 
 [[package]]
 name = "arrival-core"
-version = "0.1.0"
+version = "0.2.0"
+dependencies = [
+ "arrival-trace",
+]
 
 [[package]]
 name = "arrival-serde"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "arrival-core",
  "serde",
@@ -98,19 +101,23 @@ dependencies = [
 
 [[package]]
 name = "arrival-string"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "arrival-core",
 ]
 
 [[package]]
 name = "arrival-toml"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "arrival-core",
  "arrival-serde",
  "toml",
 ]
+
+[[package]]
+name = "arrival-trace"
+version = "0.2.0"
 
 [[package]]
 name = "bitflags"

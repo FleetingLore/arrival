@@ -1,15 +1,16 @@
-use crate::{Arg, Target, Node, NodeResult, Path};
+use crate::{Arg, Node, NodeResult, Target};
+use arrival_trace::Trace;
 
 pub struct Runtime {
     nodes: Vec<Box<dyn Node>>,
-    path: Path,
+    path: Trace,
 }
 
 impl Runtime {
     pub fn new() -> Self {
         Self {
             nodes: Vec::new(),
-            path: Path::new(),
+            path: Trace::new(),
         }
     }
 
@@ -17,17 +18,20 @@ impl Runtime {
         self.nodes.push(node);
     }
 
-    pub fn get(&self, path: &Path) -> Option<&dyn Node> {
+    pub fn get(&self, path: &Trace) -> Option<&dyn Node> {
         let key = path.to_string();
-        self.nodes.iter().find(|n| n.path().to_string() == key).map(|n| &**n)
+        self.nodes
+            .iter()
+            .find(|n| n.path().to_string() == key)
+            .map(|n| &**n)
     }
 
-    pub fn run(&mut self, initial_arg: Box<dyn Arg>, start_path: Path) -> Option<Box<dyn Target>> {
+    pub fn run(&mut self, initial_arg: Box<dyn Arg>, start_path: Trace) -> Option<Box<dyn Target>> {
         let mut current_arg = initial_arg;
         let mut current_path = start_path;
 
         loop {
-            self.path.push(&current_path.to_string());
+            self.path.push_str(&current_path.to_string());
 
             let node = match self.get(&current_path) {
                 Some(n) => n,
@@ -44,12 +48,12 @@ impl Runtime {
         }
     }
 
-    pub fn path(&self) -> &Path {
+    pub fn path(&self) -> &Trace {
         &self.path
     }
 
     pub fn reset(&mut self) {
-        self.path = Path::new();
+        self.path = Trace::new();
     }
 
     pub fn iter_nodes(&self) -> impl Iterator<Item = &dyn Node> {
